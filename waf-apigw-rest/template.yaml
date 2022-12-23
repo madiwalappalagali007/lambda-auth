@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Serverless patterns - Amazon API Gateway REST API with S3 integration
 Resources:
-  WAFf:
+  MyWAFACL:
     Type: 'AWS::WAFv2::WebACL'
     Properties:
       Name: ExampleWebACL1
