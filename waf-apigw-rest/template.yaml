@@ -11,8 +11,6 @@ Resources:
           Content: Country not allowed
           ContentType: TEXT_PLAIN
       DefaultAction:
-        Allow:
-          Type: ALLOW
         Block:
           CustomResponse: # Choose a defined template to respond when blocked
             ResponseCode: "403"
@@ -35,7 +33,7 @@ Resources:
     Type: AWS::WAFv2::WebACLAssociation
     Properties: 
       ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${MyApi}/stages/Prod
-      WebACLArn: !GetAtt  WAFf.Arn
+      WebACLArn: !GetAtt  MyWAFACL.Arn
 
 # Lambda function as an example micro-service behind the API Gateway REST endpoint
   MyLambdaFunction:
