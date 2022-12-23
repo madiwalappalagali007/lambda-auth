@@ -3,39 +3,79 @@ Transform: AWS::Serverless-2016-10-31
 Description: Serverless patterns - AWS WAF to Amazon API Gateway REST
 
 Resources:
-  # AWS WAF Access Control List limits each IP to 100 requestes per second
-  MyWAFACL:
-    Type: AWS::WAFv2::WebACL
+  # my try
+   WAFforcloudfront:
+    Type: 'AWS::WAFv2::WebACL'
     Properties:
-      CustomResponseBodies: # Define a response from WAF
-        CountryNotValid:
-          Content: Country not allowed
-          ContentType: TEXT_PLAIN
-      DefaultAction:
-        Block: 
-          CustomResponse: # Choose a defined template to respond when blocked
-            ResponseCode: "403"
-            CustomResponseBodyKey: CountryNotValid
-      Description: Application WAF
+      Name: ExampleWebACL1
       Scope: REGIONAL
+      Description: This is an example WebACL
+      DefaultAction:
+        Allow:
+          CustomRequestHandling:
+            InsertHeaders:
+              - Name: AllowActionHeader1Name
+                Value: AllowActionHeader1Value
+              - Name: AllowActionHeader2Name
+                Value: AllowActionHeader2Value
       VisibilityConfig:
-        CloudWatchMetricsEnabled: true
-        MetricName: AppRules
         SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: ExampleWebACLMetric
+      CustomResponseBodies:
+        CustomResponseBodyKey1:
+          ContentType: TEXT_PLAIN
+          Content: this is a plain text
+        CustomResponseBodyKey2:
+          ContentType: APPLICATION_JSON
+          Content: '{"jsonfieldname": "jsonfieldvalue"}'
+        CustomResponseBodyKey3:
+          ContentType: TEXT_HTML
+          Content: <html>HTML text content</html>
       Rules:
-        - Action:
-            Allow: {} # Allow if conditions are met
-          Name: AllowCountryList
+        - Name: RuleWithAWSManagedRules
           Priority: 0
-          Statement:
-            GeoMatchStatement:
-              CountryCodes: # Requests from following countries are allowed (Add your country code to test)
-                - US
+          OverrideAction:
+            Count: {}
           VisibilityConfig:
-            CloudWatchMetricsEnabled: true
-            MetricName: AllowCountryList
             SampledRequestsEnabled: true
-  
+            CloudWatchMetricsEnabled: true
+            MetricName: RuleWithAWSManagedRulesMetric
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+              ExcludedRules: []
+        - Name: BlockXssAttack
+          Priority: 1
+          Action:
+            Block:
+              CustomResponse:
+                ResponseCode: 503
+                CustomResponseBodyKey: CustomResponseBodyKey1
+                ResponseHeaders:
+                  - Name: BlockActionHeader1Name
+                    Value: BlockActionHeader1Value
+                  - Name: BlockActionHeader2Name
+                    Value: BlockActionHeader2Value
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: BlockXssAttackMetric
+          Statement:
+            XssMatchStatement:
+              FieldToMatch:
+                AllQueryArguments: {}
+              TextTransformations:
+                - Priority: 1
+                  Type: NONE
+  CloudFrontOriginAccessIdentity:
+    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'Serverless website OA'
+  # AWS WAF Access Control List limits each IP to 100 requestes per second
+
   # Amazon API gateway REST API
   MyApi: 
     Type: AWS::Serverless::Api 
@@ -49,7 +89,7 @@ Resources:
     Type: AWS::WAFv2::WebACLAssociation
     Properties: 
       ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${MyApi}/stages/Prod
-      WebACLArn: !GetAtt MyWAFACL.Arn
+      WebACLArn: !GetAtt  WAFforcloudfront.Arn
 
 # Lambda function as an example micro-service behind the API Gateway REST endpoint
   MyLambdaFunction:
