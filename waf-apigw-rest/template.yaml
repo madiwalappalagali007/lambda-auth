@@ -1,10 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Serverless patterns - AWS WAF to Amazon API Gateway REST
-
+Description: Serverless patterns - Amazon API Gateway REST API with S3 integration
 Resources:
-  # my try
-   WAFforcloudfront:
+  WAFf:
     Type: 'AWS::WAFv2::WebACL'
     Properties:
       Name: ExampleWebACL1
@@ -69,12 +67,6 @@ Resources:
               TextTransformations:
                 - Priority: 1
                   Type: NONE
-#   CloudFrontOriginAccessIdentity:
-#     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
-#     Properties:
-#       CloudFrontOriginAccessIdentityConfig:
-#         Comment: 'Serverless website OA'
-  # AWS WAF Access Control List limits each IP to 100 requestes per second
 
   # Amazon API gateway REST API
   MyApi: 
@@ -89,7 +81,7 @@ Resources:
     Type: AWS::WAFv2::WebACLAssociation
     Properties: 
       ResourceArn: !Sub arn:aws:apigateway:${AWS::Region}::/restapis/${MyApi}/stages/Prod
-      WebACLArn: !GetAtt  WAFforcloudfront.Arn
+      WebACLArn: !GetAtt  WAFf.Arn
 
 # Lambda function as an example micro-service behind the API Gateway REST endpoint
   MyLambdaFunction:
