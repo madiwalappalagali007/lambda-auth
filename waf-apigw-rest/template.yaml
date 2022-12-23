@@ -69,11 +69,11 @@ Resources:
               TextTransformations:
                 - Priority: 1
                   Type: NONE
-  CloudFrontOriginAccessIdentity:
-    Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
-    Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: 'Serverless website OA'
+#   CloudFrontOriginAccessIdentity:
+#     Type: 'AWS::CloudFront::CloudFrontOriginAccessIdentity'
+#     Properties:
+#       CloudFrontOriginAccessIdentityConfig:
+#         Comment: 'Serverless website OA'
   # AWS WAF Access Control List limits each IP to 100 requestes per second
 
   # Amazon API gateway REST API
